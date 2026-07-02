@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Neon Flappy Bird - Cyber Retro Arcade</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Play Neon Flappy Bird, a premium cyber-themed arcade game. Features vibrant neon aesthetics, particle trails, synthesized retro sound effects, and offline PWA support.">
+  <meta name="theme-color" content="#0a0a12">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Neon Flappy Bird - Cyber Retro Arcade">
+  <meta property="og:description" content="Play Neon Flappy Bird, a premium cyber-themed arcade game. Features vibrant neon aesthetics, particle trails, synthesized retro sound effects, and offline PWA support.">
+  <meta property="og:image" content="cover.png">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Neon Flappy Bird - Cyber Retro Arcade">
+  <meta name="twitter:description" content="Play Neon Flappy Bird, a premium cyber-themed arcade game. Features vibrant neon aesthetics, particle trails, synthesized retro sound effects, and offline PWA support.">
+  <meta name="twitter:image" content="cover.png">
+  
+  <!-- Apple Mobile Web App Meta -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Neon Flappy">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app-container">
+    <!-- Desktop Header (Hidden on Mobile) -->
+    <header class="desktop-header">
+      <h1>NEON FLAPPY BIRD</h1>
+      <p>Click / Spacebar to Fly • Synthwave Audio • Offline PWA</p>
+    </header>
+
+    <main>
+      <!-- Premium Mobile Device Mockup for Desktop -->
+      <section class="device-frame" id="deviceFrame">
+        <!-- Speaker, camera notches -->
+        <div class="device-earpiece"></div>
+        <div class="device-camera"></div>
+        
+        <!-- Game Screen -->
+        <div class="screen-content">
+          <!-- Canvas Game Window -->
+          <canvas id="game-canvas"></canvas>
+          
+          <!-- Floating Snake Guard Button -->
+          <button id="guard-btn" class="guard-btn hide">🛡️ GUARD: 15 🪙</button>
+
+          <!-- Floating D-pad Controls -->
+          <div id="dpad-container" class="dpad-container hide">
+            <div></div>
+            <button id="dpad-up" class="dpad-btn" aria-label="Move Up">▲</button>
+            <div></div>
+            
+            <button id="dpad-left" class="dpad-btn" aria-label="Move Left">◀</button>
+            <div></div>
+            <button id="dpad-right" class="dpad-btn" aria-label="Move Right">▶</button>
+            
+            <div></div>
+            <button id="dpad-down" class="dpad-btn" aria-label="Move Down">▼</button>
+            <div></div>
+          </div>
+          
+          <!-- HUD / Overlay Elements -->
+          <div class="hud" id="hud">
+            <div class="score-container" style="display: flex; gap: 15px; flex-direction: row; align-items: center;">
+              <div style="display: flex; flex-direction: column; align-items: center;">
+                <span class="label">SCORE</span>
+                <span id="live-score" class="value">0</span>
+              </div>
+              <div style="width: 1px; height: 25px; background: rgba(0, 240, 255, 0.2);"></div>
+              <div style="display: flex; flex-direction: column; align-items: center;">
+                <span class="label">LEVEL</span>
+                <span id="live-level" class="value" style="color: var(--neon-yellow); text-shadow: var(--glow-yellow);">1</span>
+              </div>
+              <div style="width: 1px; height: 25px; background: rgba(0, 240, 255, 0.2);"></div>
+              <div style="display: flex; flex-direction: column; align-items: center;">
+                <span class="label">COINS</span>
+                <span id="live-coins" class="value" style="color: #ff9900; text-shadow: 0 0 5px #ff9900;">0</span>
+              </div>
+              <div style="width: 1px; height: 25px; background: rgba(0, 240, 255, 0.2);"></div>
+              <div style="display: flex; flex-direction: column; align-items: center;">
+                <span class="label">LIVES</span>
+                <span id="live-hearts" class="value" style="color: #ff3333; text-shadow: 0 0 5px #ff3333;">❤️ 0</span>
+              </div>
+            </div>
+            
+            <div class="controls-overlay" style="display: flex; gap: 8px;">
+              <button id="settings-btn" class="icon-btn" aria-label="Open Settings">
+                <svg viewBox="0 0 24 24" width="22" height="22">
+                  <path fill="currentColor" d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.47,5.34 14.86,5.08L14.48,2.42C14.44,2.18 14.24,2 14,2H10C9.76,2 9.56,2.18 9.52,2.42L9.14,5.08C8.53,5.34 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.95C7.96,18.34 8.53,18.66 9.14,18.92L9.52,21.58C9.56,21.82 9.76,22 10,22H14C14.24,22 14.44,21.82 14.48,21.58L14.86,18.92C15.47,18.66 16.04,18.34 16.56,17.95L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z" />
+                </svg>
+              </button>
+              <button id="sound-btn" class="icon-btn" aria-label="Toggle Sound">
+                <svg viewBox="0 0 24 24" width="22" height="22">
+                  <path id="sound-icon-path" fill="currentColor" d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.85 14,18.71V20.77C18.03,19.86 21,16.28 21,12C21,7.72 18.03,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.77 16.5,12M3,9V15H7L12,20V4L7,9H3Z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Login Overlay -->
+          <div class="screen-overlay" id="login-overlay" style="z-index: 35;">
+            <div class="title-logo">
+              <span class="logo-cyber">SYSTEM</span>
+              <span class="logo-bird">LOGIN</span>
+            </div>
+            <div class="stats-box" style="width: 100%; max-width: 280px; padding: 18px; margin-bottom: 22px; box-sizing: border-box;">
+              <div style="margin-bottom: 15px;">
+                <label for="login-username" style="font-family: var(--font-arcade); font-size: 0.65rem; color: var(--neon-cyan); display: block; margin-bottom: 6px; letter-spacing: 1px;">COORDINATOR ID</label>
+                <input type="text" id="login-username" placeholder="USERNAME" style="width: 100%; padding: 10px 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: 8px; color: #fff; font-family: var(--font-arcade); font-size: 0.8rem; box-sizing: border-box; text-transform: uppercase;" autocomplete="off">
+              </div>
+              <div style="margin-bottom: 5px;">
+                <label for="login-password" style="font-family: var(--font-arcade); font-size: 0.65rem; color: var(--neon-pink); display: block; margin-bottom: 6px; letter-spacing: 1px;">ACCESS PASSCODE</label>
+                <input type="password" id="login-password" placeholder="PASSWORD" style="width: 100%; padding: 10px 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255, 0, 127, 0.3); border-radius: 8px; color: #fff; font-family: var(--font-arcade); font-size: 0.8rem; box-sizing: border-box;" autocomplete="off">
+              </div>
+              <div id="login-error-msg" style="color: var(--neon-pink); font-family: var(--font-arcade); font-size: 0.65rem; margin-top: 10px; text-align: center; height: 14px; text-shadow: var(--glow-pink);"></div>
+            </div>
+            
+            <button id="login-btn" class="action-btn" style="width: 100%; max-width: 280px; margin-bottom: 12px; font-size: 0.9rem; padding: 12px 0;">CONNECT SYSTEM</button>
+            <button id="guest-btn" class="action-btn" style="width: 100%; max-width: 280px; font-size: 0.85rem; border-color: var(--neon-cyan); color: var(--neon-cyan); background: rgba(0, 240, 255, 0.15); box-shadow: var(--glow-cyan); padding: 10px 0;">PLAY NOW</button>
+          </div>
+
+          <!-- Start Screen Screen -->
+          <div class="screen-overlay hide" id="start-screen" style="position: relative; overflow: hidden;">
+            <!-- Half Background Mascot Parrot -->
+            <img src="greeting_parrot.png" id="start-screen-parrot-bg" style="position: absolute; bottom: -20px; right: -25px; width: 220px; height: auto; opacity: 0.38; z-index: 0; pointer-events: none; filter: drop-shadow(0 0 15px rgba(0, 255, 102, 0.45));" />
+            
+            <div class="title-logo" style="position: relative; z-index: 2;">
+              <span class="logo-cyber">NEON</span>
+              <span class="logo-bird">FLAPPY</span>
+            </div>
+            
+            <!-- User Greeting -->
+            <div style="display: flex; align-items: center; justify-content: center; gap: 24px; margin-bottom: 20px; width: 100%; position: relative; z-index: 2;">
+              <div id="user-greeting" style="font-family: var(--font-arcade); font-size: 0.85rem; color: var(--neon-cyan); text-shadow: var(--glow-cyan); text-transform: uppercase; letter-spacing: 1px; display: none;">HELLO GUEST</div>
+            </div>
+            
+            <div class="high-score-box" style="position: relative; z-index: 2;">
+              <span class="high-score-label">BEST RECORD</span>
+              <span id="best-score" class="high-score-value">0</span>
+            </div>
+            
+            <div class="instructions" style="position: relative; z-index: 2;">
+              <p class="blink">TAP TO FLY</p>
+              <p class="sub-text">Press SPACEBAR or CLICK on desktop</p>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 25px; align-items: center; width: 100%; max-width: 290px; position: relative; z-index: 2;">
+              <div style="display: flex; gap: 8px; width: 100%;">
+                <button id="start-settings-btn" class="action-btn" style="flex: 1; font-size: 0.78rem; padding: 10px 0; border-color: var(--neon-cyan); color: var(--neon-cyan);">⚙️ CONFIG</button>
+                <button id="start-account-btn" class="action-btn" style="flex: 1; font-size: 0.78rem; padding: 10px 0; border-color: var(--neon-pink); color: var(--neon-pink);">👤 PROFILE</button>
+              </div>
+              <button id="start-home-btn" class="action-btn" style="width: 100%; font-size: 0.78rem; padding: 10px 0; border-color: var(--neon-yellow); color: var(--neon-yellow); box-shadow: var(--glow-yellow);">🏡 BIRD HOME & BREEDING</button>
+            </div>
+            
+            <div class="audio-notice" style="position: relative; z-index: 2;">
+              <p>🔊 Sound will activate on your first tap</p>
+            </div>
+          </div>
+
+          <!-- Game Over Screen -->
+          <div class="screen-overlay hide" id="game-over-screen">
+            <h2 class="game-over-title" style="color: var(--neon-pink); text-shadow: var(--glow-pink);">GAME OVER</h2>
+            
+            <div class="stats-box">
+              <div class="stat-row">
+                <span>SCORE</span>
+                <span id="final-score" class="stat-val cyan-text">0</span>
+              </div>
+              <div class="stat-row">
+                <span>COINS GAINED</span>
+                <span id="game-over-coins" class="stat-val yellow-text" style="color: #ffea00; text-shadow: var(--glow-yellow);">+0</span>
+              </div>
+              <div class="stat-row">
+                <span>BEST SCORE</span>
+                <span id="game-over-best" class="stat-val pink-text">0</span>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 8px; width: 100%; max-width: 280px; margin-bottom: 12px; margin-top: 15px;">
+              <button id="restart-btn" class="action-btn" style="flex: 1.4; margin-top: 0;">PLAY AGAIN</button>
+              <button id="game-over-ad-btn" class="action-btn" style="flex: 1; margin-top: 0; font-size: 0.68rem; padding: 8px 0; border-color: var(--neon-pink); color: var(--neon-pink); box-shadow: var(--glow-pink); display: flex; align-items: center; justify-content: center; gap: 4px;">📺 +50 🪙</button>
+            </div>
+            
+            <div style="display: flex; gap: 10px; width: 100%; max-width: 280px; justify-content: center;">
+              <button id="game-over-settings-btn" class="action-btn" style="flex: 1; margin-top: 0; font-size: 0.78rem; padding: 10px 0; border-color: var(--neon-cyan); color: var(--neon-cyan);">⚙️ CONFIG</button>
+              <button id="game-over-home-btn" class="action-btn" style="flex: 1; margin-top: 0; font-size: 0.78rem; padding: 10px 0; border-color: var(--neon-yellow); color: var(--neon-yellow); box-shadow: var(--glow-yellow);">🏡 BIRD HOME</button>
+            </div>
+          </div>
+
+          <!-- Continue Game Overlay -->
+          <div class="screen-overlay hide" id="continue-overlay">
+            <h2 class="game-over-title" style="color: var(--neon-yellow); text-shadow: var(--glow-yellow); margin-bottom: 20px;">CRASH DETECTED</h2>
+            <p style="font-family: var(--font-arcade); font-size: 0.9rem; color: #fff; margin-bottom: 25px; letter-spacing: 1px;">CONSUME 1 HEART TO REBOOT AT CURRENT SCORE?</p>
+            <div style="display: flex; gap: 15px; width: 100%; max-width: 280px; justify-content: center; margin-bottom: 12px;">
+              <button id="continue-yes-btn" class="action-btn" style="flex: 1; border-color: var(--neon-cyan); color: var(--neon-cyan);">REBOOT</button>
+              <button id="continue-no-btn" class="action-btn" style="flex: 1; border-color: var(--neon-pink); color: var(--neon-pink);">ABORT</button>
+            </div>
+            <button id="continue-ad-btn" class="action-btn" style="width: 100%; max-width: 280px; margin-bottom: 15px; font-size: 0.7rem; border-color: var(--neon-pink); color: var(--neon-pink); box-shadow: var(--glow-pink); padding: 8px 0; display: flex; align-items: center; justify-content: center; gap: 4px;">📺 WATCH AD TO REBOOT FREE</button>
+            <div style="font-size: 0.85rem; color: #8fa0dd; font-family: var(--font-arcade);" id="continue-hearts-status">Hearts Remaining: ❤️ 1</div>
+          </div>
+
+          <!-- Settings Screen -->
+          <div class="screen-overlay hide" id="settings-overlay">
+            <h2 class="game-over-title" style="color: var(--neon-cyan); text-shadow: var(--glow-cyan); margin-bottom: 15px; font-size: 1.6rem;">SYSTEM CONFIG</h2>
+            
+            <!-- Tab Headers -->
+            <div style="display: flex; gap: 4px; margin-bottom: 15px; width: 100%; max-width: 290px; border-bottom: 1px solid rgba(255,255,255,0.08);">
+              <button class="settings-tab-btn active" data-tab="tab-system" style="flex: 1; background: transparent; color: var(--neon-cyan); border: none; padding: 8px 0; cursor: pointer; font-family: var(--font-arcade); font-size: 0.75rem; border-bottom: 2px solid var(--neon-cyan); text-shadow: var(--glow-cyan); transition: all 0.2s;">SYSTEM</button>
+              <button class="settings-tab-btn" data-tab="tab-birds" style="flex: 1; background: transparent; color: #8fa0dd; border: none; padding: 8px 0; cursor: pointer; font-family: var(--font-arcade); font-size: 0.75rem; border-bottom: 2px solid transparent; transition: all 0.2s;">BIRDS</button>
+              <button class="settings-tab-btn" data-tab="tab-jetpacks" style="flex: 1; background: transparent; color: #8fa0dd; border: none; padding: 8px 0; cursor: pointer; font-family: var(--font-arcade); font-size: 0.75rem; border-bottom: 2px solid transparent; transition: all 0.2s;">JETPACKS</button>
+            </div>
+
+            <div class="stats-box" style="max-width: 290px; text-align: left; margin-bottom: 20px; min-height: 280px; max-height: 360px; overflow-y: auto; padding: 15px;">
+              <!-- Total Coins display in settings -->
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 8px;">
+                <span class="high-score-label" style="margin-bottom: 0; font-size: 0.65rem;">COIN BALANCE</span>
+                <span id="settings-coins" style="font-family: var(--font-arcade); font-weight: 900; font-size: 1.15rem; color: #ff9900; text-shadow: 0 0 5px #ff9900;">0 🪙</span>
+              </div>
+
+              <!-- TAB 1: SYSTEM CONTENT -->
+              <div id="tab-system" class="tab-content">
+                <!-- Difficulty -->
+                <div style="margin-bottom: 18px;">
+                  <span class="high-score-label" style="margin-bottom: 6px;">DIFFICULTY MODE</span>
+                  <div id="tutorial-diff-row" style="display: flex; gap: 8px; width: 100%;">
+                    <button id="diff-easy-btn" class="action-btn" style="flex: 1; padding: 8px 0; font-size: 0.8rem; border-color: rgba(255,255,255,0.15);">EASY</button>
+                    <button id="diff-normal-btn" class="action-btn active" style="flex: 1; padding: 8px 0; font-size: 0.8rem; border-color: var(--neon-cyan); background: rgba(0, 240, 255, 0.15); color: #fff;">NORMAL</button>
+                  </div>
+                </div>
+
+                <!-- Slow-Mo Option -->
+                <div id="tutorial-slowmo-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; padding: 8px 12px;">
+                  <div>
+                    <div style="font-size: 0.8rem; font-weight: bold; color: #fff;">Chrono Slow-Mo</div>
+                    <div style="font-size: 0.65rem; color: #8fa0dd;">Glide at 0.6x speed</div>
+                  </div>
+                  <button id="slowmo-toggle-btn" class="pwa-btn" style="margin-top: 0; font-size: 0.7rem; padding: 6px 12px; border-color: var(--neon-pink); color: var(--neon-pink);">OFF</button>
+                </div>
+                
+                <!-- Engine Upgrades Shop -->
+                <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px;">
+                  <span class="high-score-label" style="margin-bottom: 6px;">ENGINE UPGRADE</span>
+                  <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; padding: 8px 12px;">
+                    <div>
+                      <div style="font-size: 0.8rem; font-weight: bold; color: #fff;">Flap Boost Force</div>
+                      <div style="font-size: 0.65rem; color: #8fa0dd;" id="speed-upgrade-desc">Level 0 (+0% lift)</div>
+                    </div>
+                    <button id="upgrade-speed-btn" class="pwa-btn" style="margin-top: 0; font-size: 0.7rem; padding: 6px 12px; border-color: #ff9900; color: #ff9900; box-shadow: 0 0 4px rgba(255,153,0,0.2);">Upgrade: 15 🪙</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TAB 2: BIRDS CONTENT -->
+              <div id="tab-birds" class="tab-content hide">
+                <span class="high-score-label" style="margin-bottom: 6px;">BIRD SKIN MODULES</span>
+                <!-- Default Skins -->
+                <div style="display: flex; gap: 12px; justify-content: space-between; padding: 5px 0; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                  <button class="color-bubble active" data-color="RED" style="width: 38px; height: 38px; border-radius: 50%; border: 2px solid #fff; background: #ff3333; box-shadow: 0 0 10px rgba(255,51,51,0.6);" aria-label="Cyber Red Bird"></button>
+                  <button class="color-bubble" data-color="CYAN" style="width: 38px; height: 38px; border-radius: 50%; border: 2px solid transparent; background: linear-gradient(135deg, #00ff66 0%, #00f0ff 100%); box-shadow: 0 0 8px rgba(0,255,102,0.4);" aria-label="Neon Parrot"></button>
+                  <button class="color-bubble" data-color="YELLOW" style="width: 38px; height: 38px; border-radius: 50%; border: 2px solid transparent; background: #ffea00; box-shadow: 0 0 4px rgba(255,234,0,0.2);" aria-label="Yellow Bird"></button>
+                  <button class="color-bubble" data-color="PINK" style="width: 38px; height: 38px; border-radius: 50%; border: 2px solid transparent; background: #ff007f; box-shadow: 0 0 4px rgba(255,0,127,0.2);" aria-label="Pink Bird"></button>
+                </div>
+
+                <!-- Premium Skins Shop -->
+                <span class="high-score-label" style="margin-bottom: 6px;">PREMIUM CYBER BIRDS</span>
+                <div id="premium-birds-list" style="display: flex; flex-direction: column; gap: 8px;">
+                  <!-- Dynamic Bird Shop Items Added by JS -->
+                </div>
+              </div>
+
+              <!-- TAB 3: JETPACKS CONTENT -->
+              <div id="tab-jetpacks" class="tab-content hide">
+                <span class="high-score-label" style="margin-bottom: 6px;">JETPACK FLIGHT STABILITY CORES</span>
+                <div id="jetpacks-list" style="display: flex; flex-direction: column; gap: 8px;">
+                  <!-- Dynamic Jetpack Shop Items Added by JS -->
+                </div>
+              </div>
+            </div>
+            
+            <div style="display: flex; gap: 8px; width: 100%; max-width: 280px; margin: 0 auto; justify-content: center;">
+              <button id="settings-close-btn" class="action-btn" style="flex: 1; border-color: var(--neon-cyan); color: var(--neon-cyan); padding: 10px 0;">APPLY & EXIT</button>
+              <button id="admin-key-btn" class="action-btn" style="width: 50px; border-color: #00ff66; color: #00ff66; padding: 10px 0; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; box-shadow: 0 0 5px rgba(0, 255, 102, 0.2);" aria-label="Owner Settings">🔑</button>
+            </div>
+          </div>
+
+          <!-- Account Overlay -->
+          <div class="screen-overlay hide" id="account-overlay" style="z-index: 30;">
+            <h2 class="game-over-title" style="color: var(--neon-pink); text-shadow: var(--glow-pink); margin-bottom: 12px; font-size: 1.5rem;">USER ACCOUNT</h2>
+            
+            <!-- Guest Block Screen -->
+            <div id="account-guest-block" class="hide" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 250px;">
+              <div style="font-size: 3rem; margin-bottom: 15px;">🔒</div>
+              <p style="font-family: var(--font-arcade); font-size: 0.8rem; color: var(--neon-pink); line-height: 1.5; text-shadow: var(--glow-pink); max-width: 260px; margin-bottom: 25px;">ACCESS DENIED: GUEST AUTHENTICATION HAS NO SECURE VAULT. CONNECT SYSTEM TO REGISTER.</p>
+              <button id="account-guest-login-btn" class="action-btn" style="border-color: var(--neon-cyan); color: var(--neon-cyan);">REGISTER ACCESS</button>
+            </div>
+            
+            <!-- Authorized Account View -->
+            <div id="account-auth-view" style="display: flex; flex-direction: column; width: 100%; max-width: 300px; height: 100%; max-height: 400px;">
+              <!-- Tab Headers -->
+              <div style="display: flex; gap: 4px; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.08);">
+                <button class="account-tab-btn active" data-tab="tab-vault" style="background: transparent; color: var(--neon-cyan); border: none; padding: 8px 0; cursor: pointer; font-family: var(--font-arcade); font-size: 0.62rem; border-bottom: 2px solid var(--neon-cyan); text-shadow: var(--glow-cyan); transition: all 0.2s; flex: 1;">VAULT</button>
+                <button class="account-tab-btn" data-tab="tab-friends" style="background: transparent; color: #8fa0dd; border: none; padding: 8px 0; cursor: pointer; font-family: var(--font-arcade); font-size: 0.62rem; border-bottom: 2px solid transparent; transition: all 0.2s; flex: 1;">FRIENDS</button>
+                <button class="account-tab-btn" data-tab="tab-payments" style="background: transparent; color: #8fa0dd; border: none; padding: 8px 0; cursor: pointer; font-family: var(--font-arcade); font-size: 0.62rem; border-bottom: 2px solid transparent; transition: all 0.2s; flex: 1;">CARD</button>
+                <button class="account-tab-btn" data-tab="tab-store" style="background: transparent; color: #8fa0dd; border: none; padding: 8px 0; cursor: pointer; font-family: var(--font-arcade); font-size: 0.62rem; border-bottom: 2px solid transparent; transition: all 0.2s; flex: 1;">STORE</button>
+              </div>
+              
+              <div class="stats-box" style="flex: 1; text-align: left; min-height: 260px; max-height: 310px; overflow-y: auto; padding: 12px; margin-bottom: 15px; width: 100%; box-sizing: border-box;">
+                
+                <!-- TAB 1: VAULT / PROFILE -->
+                <div id="tab-vault" class="account-tab-content">
+                  <div style="margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
+                    <div style="font-family: var(--font-arcade); font-size: 0.65rem; color: var(--neon-cyan); text-shadow: var(--glow-cyan);">COORDINATOR ID</div>
+                    <div id="vault-username" style="font-size: 1.1rem; font-weight: bold; color: #fff; font-family: var(--font-arcade); margin-top: 4px;">RAMESH</div>
+                  </div>
+                  
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-family: var(--font-arcade); font-size: 0.75rem;">
+                    <div>
+                      <span style="color: #8fa0dd; display: block; font-size: 0.6rem;">BEST RECORD</span>
+                      <span id="vault-highscore" style="color: var(--neon-yellow); text-shadow: var(--glow-yellow); font-size: 1rem;">120</span>
+                    </div>
+                    <div>
+                      <span style="color: #8fa0dd; display: block; font-size: 0.6rem;">COINS TOTAL</span>
+                      <span id="vault-coins" style="color: #ff9900; text-shadow: 0 0 5px #ff9900; font-size: 1rem;">45 🪙</span>
+                    </div>
+                    <div>
+                      <span style="color: #8fa0dd; display: block; font-size: 0.6rem;">ENGINE FORCE</span>
+                      <span id="vault-engine" style="color: var(--neon-cyan); text-shadow: var(--glow-cyan); font-size: 1rem;">LVL 2</span>
+                    </div>
+                  </div>
+                  
+                  <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px;">
+                    <span class="high-score-label" style="font-size: 0.65rem; margin-bottom: 6px;">UNLOCKED EQUIPMENT</span>
+                    <div id="vault-equipment-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 0.7rem; font-family: var(--font-arcade);">
+                      <!-- Unlocked items will be populated by JS -->
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- TAB 2: FRIENDS -->
+                <div id="tab-friends" class="account-tab-content hide">
+                  <span class="high-score-label" style="font-size: 0.65rem; margin-bottom: 6px;">ADD SYSTEM FRIEND</span>
+                  <div style="display: flex; gap: 6px; margin-bottom: 12px;">
+                    <input type="text" id="friend-username-input" placeholder="USERNAME" style="flex: 1; padding: 8px 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: 6px; color: #fff; font-family: var(--font-arcade); font-size: 0.75rem; text-transform: uppercase;" autocomplete="off">
+                    <button id="add-friend-btn" class="pwa-btn" style="margin-top: 0; padding: 8px 14px; border-color: var(--neon-cyan); color: var(--neon-cyan); border-radius: 6px; font-size: 0.7rem;">ADD</button>
+                  </div>
+                  <div id="friend-error-msg" style="color: var(--neon-pink); font-family: var(--font-arcade); font-size: 0.6rem; margin-top: -6px; margin-bottom: 10px; height: 12px; text-shadow: var(--glow-pink);"></div>
+                  
+                  <span class="high-score-label" style="font-size: 0.65rem; margin-bottom: 6px;">COORDINATOR CONNECTIONS</span>
+                  <div id="friends-list" style="display: flex; flex-direction: column; gap: 6px;">
+                    <!-- Friend cards populated by JS -->
+                  </div>
+                </div>
+                
+                <!-- TAB 3: PAYMENTS -->
+                <div id="tab-payments" class="account-tab-content hide">
+                  <!-- Credit Card Mockup -->
+                  <div class="neon-credit-card" style="width: 100%; height: 110px; border-radius: 12px; background: linear-gradient(135deg, #1b1b3a 0%, #0d0d1e 100%); border: 1px solid rgba(0, 240, 255, 0.3); box-shadow: 0 4px 10px rgba(0,0,0,0.5), inset 0 0 10px rgba(0, 240, 255, 0.2); padding: 12px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; font-family: var(--font-arcade); font-size: 0.6rem; letter-spacing: 1px; color: #fff; position: relative; margin-bottom: 12px; overflow: hidden;">
+                    <div style="position: absolute; top: -10px; right: -10px; width: 60px; height: 60px; border-radius: 50%; background: rgba(255, 0, 127, 0.15); filter: blur(10px);"></div>
+                    <div style="position: absolute; bottom: -10px; left: -10px; width: 60px; height: 60px; border-radius: 50%; background: rgba(0, 240, 255, 0.15); filter: blur(10px);"></div>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <span style="font-weight: bold; color: var(--neon-cyan); font-size: 0.55rem;">CYBER CARD</span>
+                      <span style="font-size: 0.9rem;">⚡</span>
+                    </div>
+                    
+                    <div style="width: 20px; height: 15px; background: rgba(255, 234, 0, 0.7); border-radius: 3px; box-shadow: 0 0 5px rgba(255, 234, 0, 0.5);"></div>
+                    
+                    <div id="card-preview-number" style="font-size: 0.75rem; word-spacing: 4px; text-shadow: 0 0 3px #fff; text-align: center; margin: 4px 0;">•••• •••• •••• ••••</div>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                      <div>
+                        <span style="color: #6a7bb0; font-size: 0.4rem; display: block; margin-bottom: 2px;">CARDHOLDER</span>
+                        <span id="card-preview-holder" style="color: #fff; text-transform: uppercase;">CARDHOLDER NAME</span>
+                      </div>
+                      <div style="text-align: right;">
+                        <span style="color: #6a7bb0; font-size: 0.4rem; display: block; margin-bottom: 2px;">VALID THRU</span>
+                        <span id="card-preview-expiry">MM/YY</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.65rem; font-family: var(--font-arcade);">
+                    <div>
+                      <input type="text" id="card-holder-input" placeholder="CARDHOLDER NAME" style="width: 100%; padding: 6px 8px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff; font-family: var(--font-arcade); font-size: 0.7rem; text-transform: uppercase;" autocomplete="off">
+                    </div>
+                    <div>
+                      <input type="text" id="card-number-input" placeholder="CARD NUMBER (16 DIGITS)" maxlength="19" style="width: 100%; padding: 6px 8px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff; font-family: var(--font-arcade); font-size: 0.7rem;" autocomplete="off">
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                      <input type="text" id="card-expiry-input" placeholder="MM/YY" maxlength="5" style="flex: 1; padding: 6px 8px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff; font-family: var(--font-arcade); font-size: 0.7rem;" autocomplete="off">
+                      <input type="password" id="card-cvv-input" placeholder="CVV" maxlength="3" style="flex: 1; padding: 6px 8px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff; font-family: var(--font-arcade); font-size: 0.7rem;" autocomplete="off">
+                    </div>
+                    <button id="save-card-btn" class="pwa-btn" style="width: 100%; margin-top: 4px; padding: 8px 0; border-color: var(--neon-cyan); color: var(--neon-cyan); font-size: 0.75rem;">SAVE CARD METHOD</button>
+                    <div id="card-error-msg" style="color: var(--neon-pink); text-align: center; font-size: 0.6rem; height: 12px; margin-top: -2px; text-shadow: var(--glow-pink);"></div>
+                  </div>
+                </div>
+                
+                <!-- TAB 4: STORE -->
+                <div id="tab-store" class="account-tab-content hide" style="position: relative;">
+                  <span class="high-score-label" style="font-size: 0.65rem; margin-bottom: 6px;">COSMO CYBER STORE</span>
+                  <div style="display: flex; flex-direction: column; gap: 8px;" id="store-listings">
+                    <!-- Shop Items populated dynamically in JS -->
+                  </div>
+                  <!-- Secure Transaction overlay wrapper inside stats-box -->
+                  <div id="store-processing-overlay" class="hide" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(8, 8, 16, 0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; box-sizing: border-box; padding: 20px; z-index: 5; border-radius: 10px;">
+                    <div style="font-size: 2rem; filter: drop-shadow(0 0 5px var(--neon-cyan)); animation: pulse 0.8s infinite alternate; margin-bottom: 12px;">⚡</div>
+                    <span style="font-family: var(--font-arcade); font-size: 0.7rem; color: var(--neon-cyan); text-shadow: var(--glow-cyan); margin-bottom: 10px;" id="store-processing-title">PROCESSING TRANSACTION</span>
+                    <div style="width: 150px; height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden;">
+                      <div id="store-processing-bar" style="width: 0%; height: 100%; background: var(--neon-cyan); box-shadow: var(--glow-cyan); transition: width 0.1s linear;"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <button id="account-close-btn" class="action-btn" style="width: 100%; max-width: 280px; border-color: var(--neon-cyan); color: var(--neon-cyan); padding: 10px 0;">APPLY & EXIT</button>
+          </div>
+
+          <!-- Tutorial Overlay (Backdrop mask only) -->
+          <div class="screen-overlay hide" id="tutorial-overlay" style="z-index: 40; background: rgba(8, 8, 16, 0.88); pointer-events: none;"></div>
+
+          <!-- Tutorial Dialog Bubble Container (Direct child of screen-content) -->
+          <div id="tutorial-bubble-container" class="tutorial-bubble-container hide" style="display: flex; flex-direction: column; width: 100%; max-width: 320px; align-items: center; gap: 12px; pointer-events: auto;">
+            <div class="cosmo-dialog-bubble" style="position: relative; background: var(--panel-bg); border: 2px solid var(--neon-cyan); border-radius: 16px; padding: 14px; box-shadow: var(--glow-cyan); width: 100%; box-sizing: border-box;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <div style="font-family: var(--font-arcade); font-size: 0.75rem; color: var(--neon-yellow); text-shadow: var(--glow-yellow); letter-spacing: 1px;">COSMO GUIDE:</div>
+                <select id="tutorial-lang-select" style="background: rgba(12, 12, 22, 0.9); border: 1px solid var(--neon-cyan); border-radius: 4px; color: var(--neon-cyan); font-family: var(--font-main); font-size: 0.62rem; padding: 2px 4px; outline: none; cursor: pointer; box-shadow: var(--glow-cyan); font-weight: bold;">
+                  <option value="EN">🇬🇧 EN</option>
+                  <option value="SI" selected>🇱🇰 SI</option>
+                  <option value="ZH">🇨🇳 ZH</option>
+                  <option value="JA">🇯🇵 JA</option>
+                </select>
+              </div>
+              <p id="tutorial-text" style="font-family: var(--font-main); font-size: 0.78rem; color: #fff; line-height: 1.45; margin: 0; min-height: 48px;">Welcome, pilot! I will guide you through the initial configuration steps.</p>
+              <div class="bubble-arrow" style="position: absolute; bottom: -10px; left: 40px; width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 10px solid var(--neon-cyan);"></div>
+            </div>
+            
+            <div style="display: flex; align-items: center; width: 100%; justify-content: space-between; box-sizing: border-box; padding: 0 5px;">
+              <div class="cosmo-avatar-wrapper" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--neon-yellow); overflow: hidden; background: #0c0c16; box-shadow: var(--glow-yellow); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <img id="cosmo-avatar" src="cyber_assistant_avatar.png" alt="Cosmo Avatar" style="width: 90%; height: 90%; object-fit: contain;">
+              </div>
+              
+              <div style="display: flex; gap: 6px;">
+                <button id="tutorial-prev" class="pwa-btn hide" style="margin-top: 0; padding: 6px 12px; border-color: #8fa0dd; color: #8fa0dd; border-radius: 8px; font-size: 0.65rem;">PREV</button>
+                <button id="tutorial-next" class="pwa-btn" style="margin-top: 0; padding: 6px 12px; border-color: var(--neon-cyan); color: var(--neon-cyan); border-radius: 8px; font-size: 0.65rem;">NEXT</button>
+                <button id="tutorial-skip" class="pwa-btn" style="margin-top: 0; padding: 6px 12px; border-color: var(--neon-pink); color: var(--neon-pink); border-radius: 8px; font-size: 0.65rem;">SKIP</button>
+              </div>
+            </div>
+          </div>
+           
+           <!-- Announcement Overlay -->
+           <div class="screen-overlay hide" id="announcement-overlay" style="z-index: 60; background: rgba(8, 8, 16, 0.95); box-sizing: border-box; padding: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+             <div class="cosmo-avatar-wrapper" style="width: 70px; height: 70px; border-radius: 50%; border: 3px solid var(--neon-yellow); overflow: hidden; background: #0c0c16; box-shadow: var(--glow-yellow); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-bottom: 15px;">
+               <img src="cyber_assistant_avatar.png" alt="Cosmo Avatar" style="width: 90%; height: 90%; object-fit: contain;">
+             </div>
+             <h2 id="announcement-title" class="game-over-title" style="font-size: 1.3rem; margin-bottom: 10px; letter-spacing: 2px; color: var(--neon-yellow); text-shadow: var(--glow-yellow);">ANNOUNCEMENT</h2>
+             <div id="announcement-message" style="font-family: var(--font-arcade); font-size: 0.75rem; color: #8fa0dd; line-height: 1.6; margin-bottom: 20px; letter-spacing: 1px; max-width: 280px; white-space: pre-line;">
+               <!-- message text -->
+             </div>
+             <button id="announcement-close-btn" class="action-btn" style="border-color: var(--neon-cyan); color: var(--neon-cyan); padding: 10px 24px; font-size: 0.8rem; box-shadow: var(--glow-cyan);">OK</button>
+           </div>
+
+          <!-- Home Tutorial Overlay Backdrop -->
+          <div class="screen-overlay hide" id="home-tutorial-overlay" style="z-index: 47; background: rgba(8, 8, 16, 0.75); pointer-events: auto;"></div>
+
+          <!-- Bird Home Screen -->
+          <div class="screen-overlay hide" id="home-overlay" style="z-index: 45; padding: 20px 10px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <h2 class="game-over-title" style="color: var(--neon-yellow); text-shadow: var(--glow-yellow); margin-bottom: 12px; font-size: 1.5rem; letter-spacing: 1px;">COSMO BIRD HOME</h2>
+            
+            <!-- Aviary Roost Section -->
+            <div id="home-aviary-roost" style="width: 100%; max-width: 300px; height: 62px; background: rgba(0,0,0,0.4); border: 1px solid var(--neon-yellow); border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: flex-start; gap: 12px; overflow-x: auto; padding: 0 10px; box-sizing: border-box; box-shadow: var(--glow-yellow); flex-shrink: 0; position: relative;">
+              <!-- Dynamically populated 2D animated birds perch on a branch -->
+              <div style="position: absolute; bottom: 8px; left: 10px; right: 10px; height: 3px; background: #ffaa00; box-shadow: 0 0 5px #ffaa00; border-radius: 2px;"></div>
+            </div>
+            
+            <!-- Tab Headers -->
+            <div style="display: flex; gap: 4px; margin-bottom: 10px; width: 100%; max-width: 300px; border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0;">
+              <button class="home-tab-btn active" data-tab="tab-home-inv" style="flex: 1; background: transparent; color: var(--neon-yellow); border: none; padding: 6px 0; cursor: pointer; font-family: var(--font-arcade); font-size: 0.65rem; border-bottom: 2px solid var(--neon-yellow); text-shadow: var(--glow-yellow); transition: all 0.2s;">INVENTORY</button>
+              <button class="home-tab-btn" data-tab="tab-home-breed" style="flex: 1; background: transparent; color: #8fa0dd; border: none; padding: 6px 0; cursor: pointer; font-family: var(--font-arcade); font-size: 0.65rem; border-bottom: 2px solid transparent; transition: all 0.2s;">BREEDING</button>
+              <button class="home-tab-btn" data-tab="tab-home-nursery" style="flex: 1; background: transparent; color: #8fa0dd; border: none; padding: 6px 0; cursor: pointer; font-family: var(--font-arcade); font-size: 0.65rem; border-bottom: 2px solid transparent; transition: all 0.2s;">NURSERY</button>
+              <button class="home-tab-btn" data-tab="tab-home-feed" style="flex: 1; background: transparent; color: #8fa0dd; border: none; padding: 6px 0; cursor: pointer; font-family: var(--font-arcade); font-size: 0.65rem; border-bottom: 2px solid transparent; transition: all 0.2s;">FEED</button>
+            </div>
+
+            <div class="stats-box" style="width: 100%; max-width: 300px; text-align: left; margin-bottom: 15px; min-height: 290px; max-height: 350px; overflow-y: auto; padding: 12px; box-sizing: border-box; flex-grow: 1;">
+              <!-- Coins and Food count display in Home -->
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 6px; font-size: 0.7rem; flex-shrink: 0;">
+                <span style="font-family: var(--font-arcade); color: #fff;">COINS: <span id="home-coins" style="color: #ff9900; text-shadow: 0 0 4px #ff9900;">0 🪙</span></span>
+                <span style="font-family: var(--font-arcade); color: #fff;">FEED: <span id="home-feed-count" style="color: var(--neon-cyan); text-shadow: var(--glow-cyan);">0 🌾</span></span>
+              </div>
+
+              <!-- TAB 1: INVENTORY CONTENT -->
+              <div id="tab-home-inv" class="home-tab-content">
+                <span class="high-score-label" style="margin-bottom: 4px; font-size: 0.62rem;">MY BIRDS & JETPACKS</span>
+                <div style="display: flex; flex-direction: column; gap: 8px;" id="home-inventory-list">
+                  <!-- Dynamically populated from JS -->
+                </div>
+              </div>
+
+              <!-- TAB 2: BREEDING CAGE CONTENT -->
+              <div id="tab-home-breed" class="home-tab-content hide">
+                <span class="high-score-label" style="margin-bottom: 6px; font-size: 0.62rem;">SELECT PARENT BIRDS</span>
+                <div style="display: flex; gap: 10px; justify-content: space-around; margin-bottom: 12px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 10px;">
+                  <!-- Parent 1 Selector -->
+                  <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                    <span style="font-family: var(--font-arcade); font-size: 0.55rem; color: var(--neon-cyan);">PARENT A</span>
+                    <div id="breed-parent-a-preview" style="width: 50px; height: 50px; border: 2px dashed rgba(0,240,255,0.3); border-radius: 8px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3);">
+                      <span style="font-size: 1.2rem;">❓</span>
+                    </div>
+                    <select id="breed-parent-a-select" style="width: 85px; background: #000; border: 1px solid rgba(255,255,255,0.2); color: #fff; font-size: 0.6rem; padding: 2px; font-family: var(--font-main); border-radius: 4px;">
+                      <option value="">Choose...</option>
+                    </select>
+                  </div>
+
+                  <!-- Breeding Icon -->
+                  <div style="display: flex; align-items: center; font-size: 1.5rem; text-shadow: var(--glow-pink);">❤️</div>
+
+                  <!-- Parent 2 Selector -->
+                  <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                    <span style="font-family: var(--font-arcade); font-size: 0.55rem; color: var(--neon-pink);">PARENT B</span>
+                    <div id="breed-parent-b-preview" style="width: 50px; height: 50px; border: 2px dashed rgba(255,0,127,0.3); border-radius: 8px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3);">
+                      <span style="font-size: 1.2rem;">❓</span>
+                    </div>
+                    <select id="breed-parent-b-select" style="width: 85px; background: #000; border: 1px solid rgba(255,255,255,0.2); color: #fff; font-size: 0.6rem; padding: 2px; font-family: var(--font-main); border-radius: 4px;">
+                      <option value="">Choose...</option>
+                    </select>
+                  </div>
+                </div>
+
+                <button id="breed-action-btn" class="pwa-btn" style="width: 100%; border-color: var(--neon-pink); color: var(--neon-pink); font-size: 0.75rem; text-shadow: var(--glow-pink); margin-top: 4px; padding: 8px 0;">BREED BIRDS (100 🪙)</button>
+                <div id="breed-error-msg" style="color: var(--neon-pink); font-size: 0.6rem; text-align: center; margin-top: 6px; min-height: 12px; font-family: var(--font-arcade);"></div>
+              </div>
+
+              <!-- TAB 3: NURSERY CONTENT -->
+              <div id="tab-home-nursery" class="home-tab-content hide">
+                <span class="high-score-label" style="margin-bottom: 6px; font-size: 0.62rem;">INCUBATION & HATCHERY</span>
+                <div id="home-nursery-list" style="display: flex; flex-direction: column; gap: 8px;">
+                  <!-- Dynamically populated from JS -->
+                </div>
+              </div>
+
+              <!-- TAB 4: FEED SHOP CONTENT -->
+              <div id="tab-home-feed" class="home-tab-content hide">
+                <span class="high-score-label" style="margin-bottom: 6px; font-size: 0.62rem;">FEED PANTRY</span>
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 10px; align-items: center; text-align: center;">
+                  <div style="font-size: 2.2rem; filter: drop-shadow(0 0 6px var(--neon-cyan));">🌾</div>
+                  <span style="font-family: var(--font-arcade); font-size: 0.75rem; color: #fff;">CYBER SEED BAG</span>
+                  <p style="font-family: var(--font-main); font-size: 0.65rem; color: #8fa0dd; margin: 0;">Cyber Seed can be used to feed breeding parents or chicks to speed up progress by 30 seconds!</p>
+                  <button id="buy-feed-btn" class="pwa-btn" style="border-color: var(--neon-cyan); color: var(--neon-cyan); font-size: 0.7rem; padding: 6px 16px; margin-top: 4px;">BUY SEED (50 🪙)</button>
+                </div>
+              </div>
+            </div>
+            
+            <button id="home-close-btn" class="action-btn" style="width: 100%; max-width: 300px; border-color: var(--neon-yellow); color: var(--neon-yellow); padding: 8px 0; font-size: 0.75rem; flex-shrink: 0; box-shadow: var(--glow-yellow);">EXIT BIRD HOME</button>
+          </div>
+
+          <!-- Admin Panel Overlay -->
+          <div class="screen-overlay hide" id="admin-overlay" style="z-index: 50; background: rgba(5, 5, 10, 0.95); padding: 20px; box-sizing: border-box;">
+            <h2 class="game-over-title" style="color: #00ff66; text-shadow: 0 0 10px rgba(0, 255, 102, 0.5); font-size: 1.4rem; letter-spacing: 2px; margin-bottom: 20px;">ADMIN PANEL</h2>
+            
+            <!-- Passcode Gate -->
+            <div id="admin-lock-screen" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+              <p style="font-family: var(--font-arcade); font-size: 0.7rem; color: #8fa0dd; margin-bottom: 15px; letter-spacing: 1px;">ENTER OWNER PASSWORD CODE</p>
+              <input type="password" id="admin-pass-input" placeholder="PASSCODE" style="width: 100%; max-width: 220px; padding: 12px; background: rgba(0,0,0,0.6); border: 2px solid #00ff66; border-radius: 8px; color: #00ff66; font-family: var(--font-arcade); font-size: 1.2rem; text-align: center; letter-spacing: 4px; box-sizing: border-box; margin-bottom: 20px; outline: none; box-shadow: 0 0 10px rgba(0, 255, 102, 0.15);" autocomplete="off">
+              <button id="admin-unlock-btn" class="action-btn" style="border-color: #00ff66; color: #00ff66; width: 100%; max-width: 220px; font-size: 0.85rem; padding: 12px 0;">ACCESS PANEL</button>
+              <button id="admin-close-lock-btn" class="pwa-btn" style="margin-top: 15px; border-color: var(--neon-pink); color: var(--neon-pink); padding: 8px 16px;">CANCEL</button>
+              <div id="admin-lock-error" style="color: var(--neon-pink); font-family: var(--font-arcade); font-size: 0.7rem; margin-top: 15px; height: 15px; text-shadow: var(--glow-pink);"></div>
+            </div>
+            
+             <!-- Dashboard Controls -->
+             <div id="admin-dashboard" class="hide" style="display: flex; flex-direction: column; width: 100%; max-width: 320px; height: 100%; max-height: 480px; box-sizing: border-box;">
+               <!-- Admin Tab Headers -->
+               <div style="display: flex; gap: 4px; margin-bottom: 10px; width: 100%; border-bottom: 2px solid #00ff66; padding-bottom: 5px; box-sizing: border-box;">
+                 <button class="admin-tab-btn active" data-tab="admin-tab-users" style="flex: 1; background: transparent; color: #00ff66; border: none; padding: 6px 0; cursor: pointer; font-family: var(--font-arcade); font-size: 0.65rem; border-bottom: 2px solid #00ff66; text-shadow: 0 0 5px rgba(0,255,102,0.2); transition: all 0.2s;">USERS</button>
+                 <button class="admin-tab-btn" data-tab="admin-tab-db" style="flex: 1; background: transparent; color: #8fa0dd; border: none; padding: 6px 0; cursor: pointer; font-family: var(--font-arcade); font-size: 0.65rem; border-bottom: 2px solid transparent; transition: all 0.2s;">DATABASE SYNC</button>
+               </div>
+
+               <!-- ADMIN TAB 1: USERS -->
+               <div id="admin-tab-users" class="admin-tab-content" style="display: flex; flex-direction: column; flex: 1; height: 100%;">
+                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                   <span style="font-family: var(--font-arcade); font-size: 0.65rem; color: #8fa0dd;">ACCOUNTS LOADED</span>
+                   <span id="admin-user-count" style="font-family: var(--font-arcade); font-size: 0.7rem; color: #00ff66;">ACCOUNTS: 0</span>
+                 </div>
+                 <div style="flex: 1; overflow-y: auto; background: rgba(0,0,0,0.5); border: 1px solid rgba(0, 255, 102, 0.2); border-radius: 12px; padding: 10px; margin-bottom: 15px; box-sizing: border-box; max-height: 280px;" class="stats-box">
+                   <div id="admin-users-list" style="display: flex; flex-direction: column; gap: 8px;">
+                     <!-- Dynamic user list entries -->
+                   </div>
+                 </div>
+               </div>
+
+               <!-- ADMIN TAB 2: DATABASE SYNC -->
+               <div id="admin-tab-db" class="admin-tab-content hide" style="display: flex; flex-direction: column; flex: 1; height: 100%; max-height: 350px;">
+                 <div style="margin-bottom: 12px; border-bottom: 1px solid rgba(0, 255, 102, 0.1); padding-bottom: 8px;">
+                   <span style="font-family: var(--font-arcade); font-size: 0.65rem; color: #8fa0dd; display: block; margin-bottom: 4px;">SYNC STATUS</span>
+                   <span id="admin-db-status" style="font-family: var(--font-arcade); font-size: 0.8rem; color: #ff007f; text-shadow: var(--glow-pink);">LOCAL INDEXEDDB</span>
+                 </div>
+
+                 <div id="firebase-setup-form" style="display: flex; flex-direction: column; gap: 8px; font-family: var(--font-arcade); font-size: 0.65rem;">
+                   <label for="firebase-config-input" style="color: #00ff66;">PASTE FIREBASE WEB CONFIG JSON:</label>
+                   <textarea id="firebase-config-input" placeholder='{&#10;  "apiKey": "AIzaSy...",&#10;  "projectId": "...",&#10;  ...&#10;}' style="width: 100%; height: 120px; background: rgba(0,0,0,0.6); border: 1px solid rgba(0, 255, 102, 0.3); border-radius: 8px; color: #00ff66; padding: 8px; font-family: monospace; font-size: 0.75rem; box-sizing: border-box; resize: none; outline: none;"></textarea>
+                   
+                   <button id="admin-db-connect-btn" class="pwa-btn" style="border-color: #00ff66; color: #00ff66; padding: 10px 0; margin-top: 4px; font-size: 0.75rem;">ACTIVATE CLOUD SYNC</button>
+                   <div id="admin-db-error" style="color: var(--neon-pink); height: 14px; text-align: center; text-shadow: var(--glow-pink); margin-top: 2px;"></div>
+                 </div>
+
+                 <div id="firebase-active-info" class="hide" style="display: flex; flex-direction: column; gap: 10px; font-family: var(--font-arcade); font-size: 0.65rem;">
+                   <div style="background: rgba(0, 255, 102, 0.05); border: 1px solid rgba(0, 255, 102, 0.2); border-radius: 8px; padding: 10px;">
+                     <p style="color: #00ff66; margin: 0 0 5px 0;">PROJECT ID: <span id="admin-db-project-id" style="color: #fff;">-</span></p>
+                     <p style="color: #8fa0dd; margin: 0; line-height: 1.4;">ALL PROFILES ARE SYNCHRONIZED ACROSS DEVICES USING THIS DATABASE IN REAL-TIME.</p>
+                   </div>
+                   <button id="admin-db-disconnect-btn" class="pwa-btn" style="border-color: var(--neon-pink); color: var(--neon-pink); padding: 10px 0; font-size: 0.75rem;">DISCONNECT & USE LOCAL DB</button>
+                 </div>
+               </div>
+
+               <button id="admin-exit-btn" class="action-btn" style="border-color: #00ff66; color: #00ff66; width: 100%; padding: 10px 0; font-size: 0.85rem; margin-top: auto;">EXIT DASHBOARD</button>
+             </div>
+          </div>
+
+          <!-- Interstitial Ad Overlay -->
+          <div class="screen-overlay hide" id="ad-interstitial-modal" style="z-index: 80; background: rgba(6, 6, 12, 0.98); box-sizing: border-box; padding: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+            <div style="font-size: 0.85rem; font-family: var(--font-arcade); color: #8fa0dd; margin-bottom: 25px; letter-spacing: 1px;">SPONSORED ADVERTISEMENT</div>
+            <div style="width: 250px; height: 180px; background: linear-gradient(135deg, #120e2e 0%, #060414 100%); border: 2px solid var(--neon-cyan); box-shadow: var(--glow-cyan); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; margin-bottom: 30px; padding: 15px; box-sizing: border-box; position: relative; overflow: hidden;">
+              <div style="position: absolute; top: -20px; right: -20px; width: 80px; height: 80px; border-radius: 50%; background: rgba(0, 240, 255, 0.1); filter: blur(10px);"></div>
+              <div style="font-size: 2.2rem; filter: drop-shadow(0 0 5px var(--neon-cyan));">🕹️</div>
+              <span style="font-family: var(--font-arcade); font-size: 0.72rem; color: #fff; text-shadow: 0 0 3px #fff;">CYBER SHIELD DEFENSER</span>
+              <span style="font-family: var(--font-main); font-size: 0.55rem; color: #8fa0dd; max-width: 180px; line-height: 1.3;">Secure your core using custom plasma shields! Play now.</span>
+              <div style="font-family: var(--font-arcade); font-size: 0.5rem; background: var(--neon-cyan); color: #000; padding: 4px 10px; border-radius: 4px; font-weight: bold; margin-top: 4px; box-shadow: var(--glow-cyan);">INSTALL</div>
+            </div>
+            <button id="ad-interstitial-close" class="action-btn" style="width: 100%; max-width: 200px; font-size: 0.75rem; border-color: #888; color: #888;" disabled>Skip Ad in 3s...</button>
+          </div>
+
+          <!-- Rewarded Video Ad Overlay -->
+          <div class="screen-overlay hide" id="ad-rewarded-modal" style="z-index: 85; background: rgba(6, 6, 12, 0.98); box-sizing: border-box; padding: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+            <div style="font-size: 0.85rem; font-family: var(--font-arcade); color: #8fa0dd; margin-bottom: 25px; letter-spacing: 1px;">WATCHING SPONSORED VIDEO</div>
+            <div id="ad-rewarded-video" style="width: 260px; height: 160px; background: #000; border: 2px solid var(--neon-pink); box-shadow: var(--glow-pink); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; margin-bottom: 20px; position: relative; overflow: hidden; padding: 10px; box-sizing: border-box;">
+              <div style="width: 50px; height: 50px; border: 3px dashed var(--neon-pink); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: var(--glow-pink); animation: rotate 4s linear infinite;">
+                <div style="width: 30px; height: 30px; border: 2px dashed var(--neon-cyan); border-radius: 50%; animation: rotate 2s linear infinite reverse;"></div>
+              </div>
+              <div style="font-family: var(--font-arcade); font-size: 0.7rem; color: #fff; text-shadow: var(--glow-pink); margin-top: 8px;" id="ad-rewarded-timer">REWARD IN: 5s</div>
+              <div style="width: 180px; height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden;">
+                <div id="ad-rewarded-progress" style="width: 0%; height: 100%; background: var(--neon-pink); box-shadow: var(--glow-pink);"></div>
+              </div>
+            </div>
+            <div style="font-family: var(--font-main); font-size: 0.65rem; color: #8fa0dd; margin-bottom: 20px; max-width: 240px; line-height: 1.4;">Do not close or leave. Watch fully to claim your reward!</div>
+            <button id="ad-rewarded-skip" class="pwa-btn" style="border-color: var(--neon-pink); color: var(--neon-pink); font-size: 0.65rem; padding: 6px 16px;" disabled>SKIP VIDEO</button>
+          </div>
+        </div>
+        
+        <!-- Home indicator line for mockup -->
+        <div class="device-home-bar"></div>
+      </section>
+    </main>
+
+    <!-- Desktop Footer (Hidden on Mobile) -->
+    <footer class="desktop-footer">
+      <p>Scan OR open on your mobile browser to install as a native app</p>
+      <div id="pwa-install-banner" class="hide">
+        <button id="pwa-install-btn" class="pwa-btn">Install Application</button>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Firebase SDK Compat -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+  <script src="db.js"></script>
+  <script src="game.js"></script>
+  <script>
+    // Register Service Worker for offline PWA support
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('Service Worker Registered!', reg))
+          .catch(err => console.log('Service Worker registration failed: ', err));
+      });
+    }
+  </script>
+</body>
+</html>
