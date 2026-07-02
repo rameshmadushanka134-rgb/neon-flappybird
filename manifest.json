@@ -25,5 +25,21 @@
   "background_color": "#0a0a12",
   "theme_color": "#0a0a12",
   "display": "standalone",
-  "orientation": "portrait"
+  "orientation": "portrait",
+  "screenshots": [
+    {
+      "src": "cover_portrait_800x1200.png",
+      "sizes": "800x1200",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Neon Flappy Bird Arcade Gameplay Portrait"
+    },
+    {
+      "src": "cover_landscape_1920x1080.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Neon Flappy Bird Arcade Gameplay Landscape"
+    }
+  ]
 }
